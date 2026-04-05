@@ -29,9 +29,22 @@ body{overflow:hidden;background:#0c1a10;font-family:'Segoe UI',system-ui,sans-se
 #shotType.s{transform:translate(-50%,-50%) scale(1);opacity:1}
 #sh{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);font-size:15px;color:#fff;opacity:0;transition:opacity .4s;background:rgba(0,0,0,.45);padding:9px 22px;border-radius:12px;border:1px solid rgba(0,180,120,.18)}
 #sh.v{opacity:1}
-#ctrls{position:absolute;bottom:3%;right:10px;font-size:9px;color:rgba(255,255,255,.3);line-height:1.6;text-align:right;opacity:0;transition:opacity .5s}
+#ctrls{position:absolute;bottom:3%;right:10px;font-size:10px;color:rgba(255,255,255,.4);line-height:1.7;text-align:right;opacity:0;transition:opacity .5s}
 #ctrls.v{opacity:1}
-#ctrls b{color:rgba(255,255,255,.5)}
+#ctrls b{color:rgba(255,255,255,.6)}
+#howto{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:18;opacity:0;pointer-events:none;transition:opacity .4s}
+#howto.v{opacity:1;pointer-events:auto}
+.ht{background:linear-gradient(150deg,rgba(6,22,14,.97),rgba(10,30,18,.97));border:1px solid rgba(0,180,120,.15);border-radius:24px;padding:32px 40px;max-width:520px;width:94%;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.7)}
+.ht h2{font-size:26px;color:#fff;font-weight:700;margin-bottom:18px}
+.ht-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.ht-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 10px;text-align:center}
+.ht-icon{font-size:28px;margin-bottom:4px}
+.ht-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.ht-name.sm{color:#ff4444}.ht-name.dr{color:#44ffaa}.ht-name.cl{color:#44aaff}.ht-name.dv{color:#ffaa44}
+.ht-how{font-size:11px;color:rgba(255,255,255,.4);line-height:1.4}
+.ht-tip{font-size:11px;color:rgba(255,255,255,.25);margin-bottom:18px;line-height:1.5}
+.ht-go{display:inline-block;padding:12px 40px;background:rgba(0,200,120,.12);border:1px solid rgba(0,200,120,.3);border-radius:14px;color:#0cb;font-size:17px;font-weight:600;cursor:pointer;transition:all .2s}
+.ht-go:hover{background:rgba(0,200,120,.22);transform:translateY(-2px)}
 #errmsg{position:absolute;bottom:6px;left:6px;right:6px;font-size:12px;color:red;font-family:monospace;background:rgba(0,0,0,.7);padding:6px 10px;border-radius:4px;display:none}
 #menu{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(12px);z-index:20;transition:opacity .5s}
 #menu.h{opacity:0;pointer-events:none}
@@ -70,6 +83,17 @@ body{overflow:hidden;background:#0c1a10;font-family:'Segoe UI',system-ui,sans-se
   <button class="mb" id="bs">Solo Rally<div class="d">Play vs AI &mdash; first to 11</div></button>
   <button class="mb" id="b2">2 Player<div class="d">Two hands, same webcam</div></button>
   <div class="inf">High + fast swing = <b>Smash</b><br>High + gentle = <b>Drop</b><br>Low position = <b>Clear</b><br>Mid + fast = <b>Drive</b></div>
+</div></div>
+<div id="howto"><div class="ht">
+  <h2>How to Play</h2>
+  <div class="ht-grid">
+    <div class="ht-card"><div class="ht-icon">💥</div><div class="ht-name sm">Smash</div><div class="ht-how">Hand <b>HIGH</b> + <b>fast</b> swing<br>Steep powerful shot</div></div>
+    <div class="ht-card"><div class="ht-icon">🪶</div><div class="ht-name dr">Drop</div><div class="ht-how">Hand <b>HIGH</b> + <b>gentle</b><br>Soft shot near the net</div></div>
+    <div class="ht-card"><div class="ht-icon">🌈</div><div class="ht-name cl">Clear</div><div class="ht-how">Hand <b>LOW</b> position<br>High arc to back court</div></div>
+    <div class="ht-card"><div class="ht-icon">⚡</div><div class="ht-name dv">Drive</div><div class="ht-how">Hand <b>MID</b> + <b>fast</b> swing<br>Flat fast shot</div></div>
+  </div>
+  <div class="ht-tip">Move your hand in front of the webcam to control the racket.<br>Left/right = court position &bull; Up/down = forward/back on court.<br>The shuttle is pulled toward your hand when close.</div>
+  <div class="ht-go" id="ht-ok">Got it — Start!</div>
 </div></div>
 <div id="ld"><div class="spr"></div><div class="lt" id="lm">Starting webcam...</div></div>
 <div id="go"><div class="gc"><h2 id="wt">Game Over</h2><div class="fn" id="fs">0-0</div>
@@ -660,11 +684,16 @@ async function startG(m){
   try{if(!vidOK)await startCam();if(!hlm)await initMP();}catch(e){ge('lm').textContent='Error: '+e.message;return;}
   ge('ld').classList.remove('s');ge('sb').classList.add('v');ge('ctrls').classList.add('v');
   AI.x=0;AI.y=.5;AI.z=.88;HS[0].sx=W/2;HS[0].sy=H*.7;HS[1].sx=W/2;HS[1].sy=H*.4;
-  resetS();state='serving';
+  resetS();
+  // Show how-to screen before first game
+  ge('howto').classList.add('v');state='howto';
 }
+function beginPlay(){ge('howto').classList.remove('v');state='serving';}
+
 function endG(w){const n=w===0?(mode==='solo'?'You Win!':'P1 Wins!'):(mode==='solo'?'AI Wins!':'P2 Wins!');ge('wt').textContent=n;ge('fs').textContent=sc[0]+' - '+sc[1];ge('bt').textContent='Best Rally: '+bstk;ge('go').classList.add('s');}
 
 ge('bs').onclick=()=>startG('solo');ge('b2').onclick=()=>startG('2p');ge('br').onclick=()=>startG(mode);
+ge('ht-ok').onclick=()=>beginPlay();
 ge('bm').onclick=()=>{state='menu';ge('go').classList.remove('s');ge('sb').classList.remove('v');ge('ctrls').classList.remove('v');ge('menu').classList.remove('h');};
 
 // ════════════════════════════════════════════════
